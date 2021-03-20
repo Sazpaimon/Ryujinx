@@ -136,10 +136,7 @@ namespace Ryujinx
                 }
             }
 
-            if (ConfigurationState.Instance.ShowConsole)
-            {
-                ConsoleHelper.ToggleConsole(false);
-            }
+            ConsoleHelper.ToggleConsole(ConfigurationState.Instance.ShowConsole);
 
             // Logging system information.
             PrintSystemInfo();
