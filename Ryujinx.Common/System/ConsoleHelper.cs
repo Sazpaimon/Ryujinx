@@ -37,49 +37,45 @@ namespace Ryujinx.Common.System
         {
             IntPtr consoleWindow = GetConsoleWindow();
 
-            uint dwProcessId;
-            GetWindowThreadProcessId(consoleWindow, out dwProcessId);
+            GetWindowThreadProcessId(consoleWindow, out uint dwProcessId);
 
             return dwProcessId;
-        }
-
-        private static void CreateConsole()
-        {
-            if (AllocConsole())
-            {
-                IntPtr stdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-                SafeFileHandle safeFileHandle = new SafeFileHandle(stdHandle, true);
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                FileStream fileStream = new FileStream(safeFileHandle, FileAccess.Write);
-                Encoding encoding = Encoding.GetEncoding(MY_CODE_PAGE);
-                StreamWriter standardOutput = new StreamWriter(fileStream, encoding);
-                standardOutput.AutoFlush = true;
-                Console.SetOut(standardOutput);
-                Console.Title = $"Ryujinx Console {Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}";
-            }
-            else if (GetCurrentProcessId() == GetWindowId())
-            {
-                ShowWindow(GetConsoleWindow(), SW_SHOW);
-            }
-        }
-
-        private static void HideConsole()
-        {
-            if (GetCurrentProcessId() == GetWindowId())
-            {
-                ShowWindow(GetConsoleWindow(), SW_HIDE);
-            }
         }
 
         public static void ToggleConsole(bool show)
         {
             if (show)
             {
-                CreateConsole();
+                if (AllocConsole())
+                {
+                    IntPtr stdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+                    SafeFileHandle safeFileHandle = new SafeFileHandle(stdHandle, true);
+                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+                    FileStream fileStream = new FileStream(safeFileHandle, FileAccess.Write);
+
+                    Encoding encoding = Encoding.GetEncoding(MY_CODE_PAGE);
+                    StreamWriter standardOutput = new StreamWriter(fileStream, encoding);
+                    standardOutput.AutoFlush = true;
+                    Console.SetOut(standardOutput);
+
+                    safeFileHandle.Dispose();
+                    standardOutput.Dispose();
+
+                    Console.Title = $"Ryujinx Console {Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}";
+                }
+                else if (GetCurrentProcessId() == GetWindowId())
+                {
+                    ShowWindow(GetConsoleWindow(), SW_SHOW);
+                }
             }
             else
             {
-                HideConsole();
+                if (GetCurrentProcessId() == GetWindowId())
+                {
+                    ShowWindow(GetConsoleWindow(), SW_HIDE);
+                }
             }
         }
     }

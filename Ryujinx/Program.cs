@@ -8,6 +8,7 @@ using Ryujinx.Common.SystemInfo;
 using Ryujinx.Configuration;
 using Ryujinx.Modules;
 using Ryujinx.Ui;
+using Ryujinx.Ui.Helper;
 using Ryujinx.Ui.Widgets;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using System;
